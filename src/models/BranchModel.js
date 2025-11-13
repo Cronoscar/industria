@@ -1,0 +1,51 @@
+export default class BranchModel {
+    #name;
+    #location;
+    #availableSpots;
+    #totalSpots;
+    #hourlyPrice;
+    #reservationPrice;
+    #parkingTimeLimit;
+    #commerceID;
+
+    constructor(name,location,availableSpots,totalSpots,hourlyPrice,reservationPrice,parkingTimeLimit,commerceID = null) {
+        this.#name = name;
+        this.#location = location;
+        this.#availableSpots = availableSpots;
+        this.#totalSpots = totalSpots;
+        this.#hourlyPrice = hourlyPrice;
+        this.#reservationPrice = reservationPrice;
+        this.#parkingTimeLimit = parkingTimeLimit;
+        this.#commerceID = commerceID;
+    }
+
+    static getAll(){
+        //obtener conexión a la base de datos
+
+    }
+
+    static getById(id){
+
+    }
+
+    static update(id, personData){
+
+    }
+
+    static delete(id){
+
+    }
+}
+
+// CREATE TABLE trade.tblSucursales (
+//     ID_Sucursal INT IDENTITY(1,1) PRIMARY KEY,
+//     Nombre NVARCHAR(150) NOT NULL,
+//     Ubicacion NVARCHAR(255),
+//     Espacios_Disponibles INT,
+//     Espacios_Totales INT,
+//     Precio_por_hora DECIMAL(10,2),
+//     Precio_reserva DECIMAL(10,2),
+//     Limite_Hora_Parqueo DECIMAL(10,2),
+//     ID_Comercio INT NOT NULL,
+//     FOREIGN KEY (ID_Comercio) REFERENCES trade.tblComercios(ID_Comercio)
+// );

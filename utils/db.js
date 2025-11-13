@@ -5,14 +5,15 @@ dotenv.config();
 
 // Configuración de conexión a SQL Server
 const dbConfig = {
-    user: process.env.DB_USER ,
+  user: process.env.DB_USER ,
   password: process.env.DB_PASS  ,
-  server: process.env.DB_SERVER , // Cambia si usas una instancia: "localhost\\SQLEXPRESS"
+  server: process.env.DB_SERVER , 
+  port: 1433,
   database: process.env.DB_NAME  ,
   options: {
-    encrypt: false, // true si es Azure
-    trustServerCertificate: true, // necesario para conexiones locales
-    instanceName: 'SQLEXPRESS', // Dejar vacío si no usas una instancia
+    encrypt: false,
+    trustServerCertificate: true,
+    // instanceName: 'SQLEXPRESS', // Dejar vacío si no usas una instancia
   },
 };
 
@@ -26,10 +27,10 @@ export  const getConnection = async () => {
       return pool;
     }
     pool = await sql.connect(dbConfig);
-    console.log("✅ Conexión exitosa a SQL Server (base de datos 'ProyectoSpotty')");
+    console.log(" Conexión exitosa a SQL Server (base de datos 'ProyectoSpotty')");
     return pool;
   } catch (error) {
-    console.error("❌ Error al conectar con SQL Server:", error.message);
+    console.error(" Error al conectar con SQL Server:", error.message);
     throw error;
   }
 };

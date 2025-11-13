@@ -1,13 +1,27 @@
 import express from "express";
 import dotenv from "dotenv";
-import { getConnection ,sql} from "../utils/db.js";
+import { getConnection , sql} from "../utils/db.js";
+import personRouter from "./routes/PersonRoutes.js";
+import categoryRouter from "./routes/CategoryRoutes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from './../swagger_output.json' assert { type: 'json' };
+
 dotenv.config();
 const app = express();
-const port = process.env.PORT ;
+const port = process.env.PORT || 8000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// aqui enlazamos todos los routers a la ruta base de los controladores
+app.use("/api/persons", personRouter);
+app.use("/api/categories", categoryRouter);
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
-  
 });
+
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
 }); 
