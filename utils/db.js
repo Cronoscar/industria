@@ -13,7 +13,7 @@ const dbConfig = {
   options: {
     encrypt: false,
     trustServerCertificate: true,
-    // instanceName: 'SQLEXPRESS', // Dejar vacío si no usas una instancia
+    instanceName: 'SQLEXPRESS', // Dejar vacío si no usas una instancia
   },
 };
 

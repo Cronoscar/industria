@@ -1,4 +1,5 @@
 import { getConnection } from "../../utils/db.js";
+
 import sql from 'mssql';
 
 const db = await getConnection();
@@ -7,6 +8,7 @@ const db = await getConnection();
  * @author: Gerardo Salinas <gerardoaplicano16@gmail.com>
  */
 export default class PersonModel {
+    id;
     name;
     surname;
     gender;
@@ -15,13 +17,15 @@ export default class PersonModel {
 
     /**
      * @constructor
+     * @param {number} id - identificador
      * @param {string} name - nombre
      * @param {string} surname - apellido
      * @param {string} gender - genero
      * @param {string} email - correo electrónico
      * @param {string} password - contraseña
      */
-    constructor(name, surname, gender, email, password){
+    constructor(id, name, surname, gender, email, password){
+        this.id = id;
         this.name = name;
         this.surname = surname;
         this.gender = gender || 'N/A';
@@ -29,15 +33,16 @@ export default class PersonModel {
         this.#password = password;
     }
 
-    static async create(person){
-        const person = await db.request()
-            .input('nombre',sql.NVarChar,person.name)
-            .input('apellido',sql.NVarChar,person.surname)
-            .input('genero',sql.NVarChar,person.gender)
-            .input('correo',sql.NVarChar,person.email)
-            .input('contrasenia',sql.NVarChar,person.password)
-            .query("INSERT INTO users.tblPersonas (Nombre, Apellido, Correo, Genero, Contrasenia) VALUES (@nombre, @apellido, @correo, @genero, @contrasenia);");
-        return person.recordset;
+    static async create(personData){
+        const result = await db.request()
+            .input('id',sql.Int,personData.id)
+            .input('nombre',sql.NVarChar,personData.name)
+            .input('apellido',sql.NVarChar,personData.surname)
+            .input('genero',sql.NVarChar,personData.gender)
+            .input('correo',sql.NVarChar,personData.email)
+            .input('contrasenia',sql.NVarChar,personData.password)
+            .query("INSERT INTO users.tblPersonas (ID, Nombre, Apellido, Correo, Genero, Contrasenia) VALUES (@id, @nombre, @apellido, @correo, @genero, @contrasenia);");
+        return { success: true, id: personData.id }
     }
 
     /**
@@ -74,7 +79,7 @@ export default class PersonModel {
             .input('apellido', sql.NVarChar, personData.surname)
             .input('genero', sql.NVarChar, personData.gender)
             .input('correo', sql.NVarChar, personData.email)
-            .input('contrasenia', sql.NVarChar, personData.#password)
+            .input('contrasenia', sql.NVarChar, personData.password)
             .query("UPDATE users.tblPersonas SET Nombre=@nombre, Apellido=@apellido, Genero=@genero, Correo=@correo, Contrasenia=@contrasenia WHERE ID=@id;");
         console.log(update.rowsAffected[0])
         if (update.rowsAffected[0] == 1){
@@ -90,13 +95,13 @@ export default class PersonModel {
      * @param {Int} id 
      * @returns {PersonModel} El usuario eliminado
      */
-    static delete(id){
-        const existingPerson = this.getById(id);
-        if (existingPerson.recordset){
-            const result = db.request()
+    static async delete(id){
+        const existingPerson = await this.getById(id);
+        if (existingPerson && existingPerson.length > 0){
+            const result = await db.request()
                 .input('id',sql.Int, id)
                 .query("DELETE FROM users.tblPersonas WHERE ID=@id;");
-            return existingPerson.recordset;
+            return existingPerson[0];
         }
         return null;
     }

@@ -43,8 +43,10 @@ export default class PersonController {
 
     // POST /api/persons - Crear nuevo usuario
     static async createPerson(req, res) {
+       
         try {
-            const { name, surname, gender,  email, password } = req.body;
+            const personData = req.body;
+            const { id,name, surname, gender,  email, password } = personData;
 
             if (!name || !email) {
                 return res.status(400).json({
@@ -52,8 +54,8 @@ export default class PersonController {
                     message: "Todos los campos son requeridos",
                 });
             }
-
-            const newUser = await PersonModel.create(name,surname,gender,email,password);
+           
+            const newUser = await PersonModel.create(personData);
             res.status(201).json({
                 success: true,
                 message: "Usuario creado exitosamente",
