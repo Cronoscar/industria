@@ -14,6 +14,7 @@ export default class PersonModel {
     gender;
     email;
     #password;
+    active;
 
     /**
      * @constructor
@@ -23,14 +24,16 @@ export default class PersonModel {
      * @param {string} gender - genero
      * @param {string} email - correo electrónico
      * @param {string} password - contraseña
+     * @param {boolean} active - estado del usuario
      */
-    constructor(id, name, surname, gender, email, password){
+    constructor(id, name, surname, gender, email, password, active){
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.gender = gender || 'N/A';
         this.email = email;
         this.#password = password;
+        this.active = active || true;
     }
 
     static async create(personData){
@@ -41,7 +44,8 @@ export default class PersonModel {
             .input('genero',sql.NVarChar,personData.gender)
             .input('correo',sql.NVarChar,personData.email)
             .input('contrasenia',sql.NVarChar,personData.password)
-            .query("INSERT INTO users.tblPersonas (ID, Nombre, Apellido, Correo, Genero, Contrasenia) VALUES (@id, @nombre, @apellido, @correo, @genero, @contrasenia);");
+            .input('activo', sql.Bit, personData.active) 
+            .query("INSERT INTO users.tblPersonas (ID, Nombre, Apellido, Correo, Genero, Contrasenia, Activo) VALUES (@id, @nombre, @apellido, @correo, @genero, @contrasenia, @activo);");
         return { success: true, id: personData.id }
     }
 
@@ -80,7 +84,8 @@ export default class PersonModel {
             .input('genero', sql.NVarChar, personData.gender)
             .input('correo', sql.NVarChar, personData.email)
             .input('contrasenia', sql.NVarChar, personData.password)
-            .query("UPDATE users.tblPersonas SET Nombre=@nombre, Apellido=@apellido, Genero=@genero, Correo=@correo, Contrasenia=@contrasenia WHERE ID=@id;");
+            .input('activo', sql.Bit, personData.active) 
+            .query("UPDATE users.tblPersonas SET Nombre=@nombre, Apellido=@apellido, Genero=@genero, Correo=@correo, Contrasenia=@contrasenia, Activo=@activo WHERE ID=@id;");
         console.log(update.rowsAffected[0])
         if (update.rowsAffected[0] == 1){
             const updatedPerson = await this.getById(id);
@@ -104,6 +109,12 @@ export default class PersonModel {
             return existingPerson[0];
         }
         return null;
+    }
+    static async disable(id){
+        const result = await db.request()
+            .input('id',sql.Int, id)
+            .query("UPDATE users.tblPersonas SET Activo = 0 WHERE ID=@id;");
+        return result.rowsAffected.length > 0 ? { success: true } : { success: false, message: "No se pudo desactivar la persona." };
     }
 }
 
