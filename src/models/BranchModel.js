@@ -1,3 +1,5 @@
+import { getConnection } from "../database/connection.js";
+const db = await getConnection();
 export default class BranchModel {
     #name;
     #location;
@@ -20,7 +22,9 @@ export default class BranchModel {
     }
 
     static getAll(){
-        //obtener conexión a la base de datos
+        const result = db.request()
+        .query("SELECT a.ID_Sucursal,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio;");
+        return result.recordset;
 
     }
 

@@ -4,6 +4,7 @@ import { getConnection , sql} from "../utils/db.js";
 import personRouter from "./routes/PersonRoutes.js";
 import categoryRouter from "./routes/CategoryRoutes.js";
 import customerRouter from "./routes/Customer.Routes.js";
+import commerceRouter from "./routes/Commerce.Routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './../swagger_output.json' with { type: 'json' };
 
@@ -20,6 +21,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/", personRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/customers", customerRouter);
+app.use("/api/commerces", commerceRouter);
+
 
 
 app.get("/", (req, res) => {
