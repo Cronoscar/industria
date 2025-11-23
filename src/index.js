@@ -7,7 +7,7 @@ import customerRouter from "./routes/Customer.Routes.js";
 import commerceRouter from "./routes/Commerce.Routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './../swagger_output.json' with { type: 'json' };
-
+import parkingSpotRouter from "./routes/ParkingSpot.Route.js";
 
 dotenv.config();
 const app = express();
@@ -22,6 +22,7 @@ app.use("/api/", personRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/customers", customerRouter);
 app.use("/api/commerces", commerceRouter);
+app.use("/api/parkingspots", parkingSpotRouter);
 
 
 

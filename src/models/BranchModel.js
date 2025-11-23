@@ -24,20 +24,26 @@ export default class BranchModel {
     static getAll(){
         const result = db.request()
         .query("SELECT a.ID_Sucursal,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio;");
-        return result.recordset;
+        return  result.recordset.length > 0 ? { success: true, data: result.recordset[0] } : { success: false, message: "Sucursal no encontrada." };
 
     }
 
     static getById(id){
-
+        const result = db.request()
+        .input("ID_Sucursal",id)
+        .query("SELECT a.ID_Sucursal,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio and a.ID_Sucursal = @ID_Sucursal;");
+        return result.recordset[0];
     }
 
     static update(id, personData){
 
     }
 
-    static delete(id){
-
+    static disable(id){
+        const result = db.request()
+        .input("ID_Sucursal",id)
+        .query("Update trade.tblSucursales set Activo = 0 where ID_Sucursal = @ID_Sucursal;");
+        return result.rowsAffected[0] > 0 ? { success: true, message: "Sucursal desactivada correctamente." } : { success: false, message: "No se pudo desactivar la Sucursal." };
     }
 }
 
