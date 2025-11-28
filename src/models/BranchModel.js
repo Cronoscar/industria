@@ -1,4 +1,4 @@
-import { getConnection } from "../database/connection.js";
+import { getConnection } from "../../utils/db.js";
 const db = await getConnection();
 export default class BranchModel {
     #name;
