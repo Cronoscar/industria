@@ -1,11 +1,10 @@
 import { getConnection } from "../../utils/db.js";
 import sql from 'mssql';
-import PersonModel from "./PersonModel.js";
+import PersonModel from "./Person.Model.js";
 
 const db = await getConnection();
 
 export default class CustomerModel {
-
 
     static async createCustomer(customerData){
         const person = await PersonModel.create(customerData.person);

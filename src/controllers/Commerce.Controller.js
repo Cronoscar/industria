@@ -1,4 +1,4 @@
-import CommerceModel from '../models/CommerceModel.js';
+import CommerceModel from '../models/Commerce.Model.js';
 export default class CommerceController {
     static async getAllCommerces(req, res) {
         try {

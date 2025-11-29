@@ -5,11 +5,11 @@ const doc = {
         title: 'API de spotty',
         description: 'Documentación de la API de Spotty',
     },
-    host: 'localhost:3000',
+    host: 'localhost:8000',
     schemes: ['http'],
 };
 
 const outputFile = './swagger_output.json';
-const endpointsFiles = ['./src/index.js','./src/routes/PersonRoutes.js'];
+const endpointsFiles = ['./src/index.js'];
 
 swaggerAutogen(outputFile, endpointsFiles, doc);
