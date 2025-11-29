@@ -8,6 +8,7 @@ import parkingSpotRouter from "./routes/ParkingSpot.Routes.js";
 import personRouter from "./routes/Person.Routes.js";
 import branchRouter from "./routes/Branch.Routes.js";
 import authRouter from "./routes/Auth.Routes.js";
+import bookingRouter from "./routes/Booking.Routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './../swagger_output.json' with { type: 'json' };
 
@@ -30,6 +31,7 @@ app.use("/api", commerceRouter);
 app.use("/api", parkingSpotRouter);
 app.use("/api", authRouter)
 app.use("/api", branchRouter);
+app.use("/api", bookingRouter);
 
 app.get("/api/version", (req, res) => {
   res.send("0.1.0");
