@@ -1,4 +1,4 @@
-import { getConnection } from "../../utils/db.js";
+import { getConnection, sql } from "../../utils/db.js";
 const db = await getConnection();
 
 export default class CategoryModel {
@@ -10,18 +10,18 @@ export default class CategoryModel {
         this.description = description;
     }
 
-    static getAll(){
-        const categories = db.request().query("SELECT ID_Categoria, Nombre, Descripcion FROM trade.tblCategorias;")
+    static async getAll(){
+        const categories = await db.request().query("SELECT ID_Categoria, Nombre, Descripcion FROM trade.tblCategorias;")
         return categories;
     }
 
-    static getById(id){
-        const category = db.request().input('id',sql.Int, id).query("SELECT ID_Categoria, Nombre, Descripcion, FROM trade.tblCategorias WHERE ID_Categoria=@id;");
+    static async getById(id){
+        const category = await db.request().input('id',sql.Int, id).query("SELECT ID_Categoria, Nombre, Descripcion, FROM trade.tblCategorias WHERE ID_Categoria=@id;");
         return category;
     }
 
-    static update(id, categoryData){
-        const category = db.request()
+    static async update(id, categoryData){
+        const category = await db.request()
             .input('id', sql.Int, id)
             .input('nombre', sql.NVarChar, categoryData.name)
             .input('descripcion', sql.NVarChar, categoryData.description)
@@ -29,8 +29,8 @@ export default class CategoryModel {
         return category;
     }
 
-    static delete(id){
-        const category = db.request()
+    static async delete(id){
+        const category = await db.request()
             .input('id',sql.Int, id)
             .query("DELETE FROM trade.tblCategorias WHERE ID_Categoria=@id;");
         return category;
