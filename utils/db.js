@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Configuración de conexión a SQL Server
 const dbConfig = {
   user: process.env.DB_USER ,
   password: process.env.DB_PASS  ,
@@ -11,23 +10,20 @@ const dbConfig = {
   port: 1433,
   database: process.env.DB_NAME  ,
   options: {
-    encrypt: false,
-    trustServerCertificate: true,
-    instanceName: 'SQLEXPRESS', // Dejar vacío si no usas una instancia
+    encrypt: true,
+    trustServerCertificate: true
   },
 };
 
-// Crear un pool de conexión global
 let pool;
 
 export  const getConnection = async () => {
   try {
     if (pool) {
-      // Reusar conexión existente
       return pool;
     }
     pool = await sql.connect(dbConfig);
-    console.log(" Conexión exitosa a SQL Server (base de datos 'ProyectoSpotty')");
+    console.info(` Conexión exitosa a ${process.env.DB_SERVER} --> ${process.env.DB_NAME}`);
     return pool;
   } catch (error) {
     console.error(" Error al conectar con SQL Server:", error.message);
