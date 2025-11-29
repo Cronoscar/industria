@@ -68,52 +68,74 @@ export default class PersonController {
 
     // POST /api/person - Crear nuevo usuario
     static async createPerson(req, res) {
-        try {
-            const { name, surname, gender,  email, password } = req.body;
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword =  await bcrypt.hash(password, salt);
-            if (!name || !surname || !gender || !email || !password) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Todos los campos son requeridos",
-                });
-            }
-            const newPerson = new PersonModel('', name, surname, gender, email, salt, hashedPassword);
-            const { accessToken, refreshToken } = generateTokens(newPerson);
-            newPerson.token = refreshToken; 
-
-            const result = await PersonModel.create(newPerson);
-            const newPersonRecord = result.recordset[0];
-            if (!result.rowsAffected[0]){
-                return res.status(400).json({
-                    success: false,
-                    message: "No se pudo insertar el registro correctamente",
-                });
-            }
-            console.log(result);
-            res.status(201).json({
-                success: true,
-                message: "Usuario creado exitosamente",
-                data: newPersonRecord,
-                accessToken: accessToken
-            });
-
-        } catch (error) {
-            res.status(500).json({
+    try {
+        const { name, surname, gender, email, password } = req.body;
+        
+        if (!name || !surname || !gender || !email || !password) {
+            return res.status(400).json({
                 success: false,
-                message: "Error al crear usuario",
-                error: error.message,
+                message: "Todos los campos son requeridos",
             });
-            console.error("Error creating user:", error);
         }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        const newPerson = new PersonModel('', name, surname, gender, email, salt, hashedPassword);
+        const { accessToken, refreshToken } = generateTokens(newPerson);
+        newPerson.token = refreshToken; 
+
+        const result = await PersonModel.create(newPerson);
+        
+        if (!result.success) {
+            return res.status(400).json({
+                success: false,
+                message: result.message || "No se pudo crear el usuario",
+            });
+        }
+
+        const personRecord = await PersonModel.getByEmail(email);
+        
+        if (!personRecord.recordset || personRecord.recordset.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Usuario creado pero no se pudo recuperar el registro",
+            });
+        }
+
+        const newPersonRecord = personRecord.recordset[0];
+        
+        console.log("User created successfully:", newPersonRecord);
+        
+        res.status(201).json({
+            success: true,
+            message: "Usuario creado exitosamente",
+            data: {
+                id: newPersonRecord.ID,
+                name: newPersonRecord.Nombre,
+                surname: newPersonRecord.Apellido,
+                email: newPersonRecord.Correo,
+                gender: newPersonRecord.Genero
+            },
+            accessToken: accessToken
+        });
+
+    } catch (error) {
+        console.error("Error creating user:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error al crear usuario",
+            error: error.message,
+        });
     }
+}
 
     // PUT /api/person/:id - Actualizar usuario
     static async updatePerson(req, res) {
         try {
             const id = parseInt(req.params.id);
-            const { name, surname, gender, email, password } = req.body;
-            const personData = new PersonModel(name, surname, gender, email, password);
+            const personData= req.body;
+        
             const updatedUser = await PersonModel.update(id, personData);
             if (!updatedUser) {
                 return res.status(404).json({
@@ -124,7 +146,7 @@ export default class PersonController {
             res.status(200).json({
                 success: true,
                 message: 'Usuario actualizado exitosamente',
-                data: updatedUser
+                data: updatedUser.data
             });
         } catch (error) {
             res.status(500).json({

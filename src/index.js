@@ -6,9 +6,11 @@ import commerceRouter from "./routes/Commerce.Routes.js";
 import customerRouter from "./routes/Customer.Routes.js";
 import parkingSpotRouter from "./routes/ParkingSpot.Routes.js";
 import personRouter from "./routes/Person.Routes.js";
+import branchRouter from "./routes/Branch.Routes.js";
+import authRouter from "./routes/Auth.Routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './../swagger_output.json' with { type: 'json' };
-import authRouter from "./routes/Auth.Routes.js";
+
 
 dotenv.config();
 const app = express();
@@ -27,6 +29,7 @@ app.use("/api", customerRouter);
 app.use("/api", commerceRouter);
 app.use("/api", parkingSpotRouter);
 app.use("/api", authRouter)
+app.use("/api", branchRouter);
 
 app.get("/api/version", (req, res) => {
   res.send("0.1.0");
@@ -35,12 +38,12 @@ app.get("/api/version", (req, res) => {
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
 }); 
-
 // try {
-//   const pool = await getConnection();
-//   const result = await pool.request().query("SELECT  a.ID, a.Nombre,a.Apellido,b.Vehiculo FROM users.tblPersonas as a, users.tblClientes as b WHERE a.ID=b.ID_CLIENTE");
-//   console.log(result.recordset);
+//     const db = await getConnection();
+//     console.log("Database connected");
+//     console.log(await db.request().query("SELECT a.ID_Sucursal,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio;"));
 // } catch (error) {
-//   console.error("Error executing query:", error);
+//     console.error("Database connection failed:", error);
 // }
+
 export default app;

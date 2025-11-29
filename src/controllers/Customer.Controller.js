@@ -5,9 +5,10 @@ export default class CustomerController {
         try {
             const customerData = req.body;
             const newCustomer = await CustomerModel.createCustomer(customerData);
-            res.status(201).json(newCustomer);
+            return res.status(201).json(newCustomer);
+            
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message });
         }
     }
     static async getAllCustomers(req, res) {
@@ -41,9 +42,9 @@ export default class CustomerController {
             const customerId = req.params.id;
             const customerData = req.body;
             const result = await CustomerModel.updateCustomerById(customerId, customerData);
-            res.status(200).json(result);
+            return res.status(200).json(result);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message });
         }
     }
     static async disableCustomer(req, res) {

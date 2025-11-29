@@ -1,7 +1,7 @@
 import { getConnection } from "../../utils/db.js";
 
 import sql from 'mssql';
-
+import bcrypt from "bcrypt";
 const db = await getConnection();
 /**
  * Modelo de la entidad "persona" de la tabla users.tblPersona
@@ -42,21 +42,39 @@ export default class PersonModel {
         this.active = active || true;
     }
 
-    static async create(personData){
-        const result = await db.request()
-            .input('nombre',sql.NVarChar,personData.name)
-            .input('apellido',sql.NVarChar,personData.surname)
-            .input('genero',sql.NVarChar,personData.gender)
-            .input('correo',sql.NVarChar,personData.email)
-            .input('salt',sql.NVarChar,personData.#salt)
-            .input('contrasenia',sql.NVarChar,personData.password)
-            .input('token',sql.NVarChar,personData.token)
-            .query("INSERT INTO users.tblPersonas ( Nombre, Apellido, Genero, Correo, Salt, Contrasenia, Token) VALUES (@nombre, @apellido, @genero, @correo, @salt, @contrasenia, @token);");
-        const resultRecord = await db.request()
-            .input('correo',sql.NVarChar,personData.email)
-            .query('SELECT ID, Nombre, Apellido, Genero, Correo, Token FROM users.tblPersonas WHERE Correo=@correo;');
-        return resultRecord;
-    }
+static async create(personData){
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(personData.password, salt);
+
+    const insertResult = await db.request()
+        .input('nombre', sql.NVarChar, personData.name)
+        .input('apellido', sql.NVarChar, personData.surname)
+        .input('genero', sql.NVarChar, personData.gender)
+        .input('correo', sql.NVarChar, personData.email)
+        .input('salt', sql.NVarChar, salt)
+        .input('contrasenia', sql.NVarChar, hashed)
+        .input('token', sql.NVarChar, "")
+        .query(`
+            INSERT INTO users.tblPersonas 
+            (Nombre, Apellido, Genero, Correo, Salt, Contrasenia, Token)
+            VALUES (@nombre, @apellido, @genero, @correo, @salt, @contrasenia, @token);
+            SELECT SCOPE_IDENTITY() AS ID;
+        `);
+
+    const newId = insertResult.recordset[0].ID;
+
+    return {
+        success: true,
+        data: {
+            id: newId,
+            name: personData.name,
+            surname: personData.surname,
+            email: personData.email
+        }
+    };
+}
+
+    
 
     /**
      * Obtiene todas las personas
@@ -97,6 +115,7 @@ export default class PersonModel {
      * @returns {PersonModel} El usuario con los datos actualizados
      */
     static async update(id, personData){
+            personData.active=true;
         const update = await db.request()
             .input('id', sql.Int, id)
             .input('nombre', sql.NVarChar, personData.name)
@@ -109,10 +128,9 @@ export default class PersonModel {
         console.log(update.rowsAffected[0])
         if (update.rowsAffected[0] == 1){
             const updatedPerson = await this.getById(id);
-            console.log(updatedPerson);
-            return updatedPerson[0];
-        }
+            return update.rowsAffected[0] > 0 ? { success: true, data: updatedPerson } : { success: false, message: "No se actualizo la persona." };
     }
+}
 
     /**
      * Elimina el registro de una persona y devuelve el registro eliminado. 

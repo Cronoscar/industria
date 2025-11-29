@@ -2,6 +2,7 @@ import { getConnection } from "../../utils/db.js";
 import sql from 'mssql';
 import PersonModel from "./Person.Model.js";
 
+
 const db = await getConnection();
 
 export default class CustomerModel {
@@ -13,12 +14,14 @@ export default class CustomerModel {
 
             throw new Error("No se pudo crear la persona asociada al cliente");
         }else{
-        
+            console.log(person.data.id);
             const result = await db.request()
-        .input('id_cliente',sql.Int,customerData.person.id)
-        .input('car',sql.NVarChar,customerData.car)
-        .query("INSERT INTO users.tblClientes (ID_CLIENTE, Vehiculo) VALUES (@id_cliente, @car);");
-        return result.rowsAffected.length > 0 ? { success: true, data: { id: customerData.person.id } } : { success: false, message: "No se pudo crear el cliente." };
+            .input('id_cliente', sql.Int, person.data.id)
+            .input('car', sql.NVarChar, customerData.customer.car)
+            .query("INSERT INTO users.tblClientes (ID_CLIENTE, Vehiculo) VALUES (@id_cliente, @car);");
+
+            return { success: true, data: { id: person.data.id ,name: customerData.person.name, car: customerData.customer.car } };
+
         }
             
     }
@@ -43,6 +46,7 @@ export default class CustomerModel {
 
     }
     static async updateCustomerById(id, customerData){
+        customerData.person.active = true;
         const person = await PersonModel.update(id, customerData.person);
         if (person.success == false){
 
@@ -52,7 +56,7 @@ export default class CustomerModel {
         .input('id_cliente',sql.Int,id)
         .input('car',sql.NVarChar,customerData.customer.car)
         .query("UPDATE users.tblClientes SET Vehiculo = @car WHERE ID_Cliente = @id_cliente;");
-        return result.rowsAffected.length > 0 ? { success: true, data: id } : { success: false, message: "No se encontró el cliente." };
+        return result.rowsAffected.length > 0 ? { success: true, data: {id, name: customerData.person.name,surname: customerData.person.surname, car: customerData.customer.car} } : { success: false, message: "No se encontró el cliente." };
     }}
     
 }

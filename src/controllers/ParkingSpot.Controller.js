@@ -4,11 +4,20 @@ export default class ParkingSpotController {
     static async getAllParkingSpots(req, res){  
         try {
             const parkingSpots = await ParkingSpot.getAll();
-            res.status(200).json({ success: true, data: parkingSpots });
+            return parkingSpots.success ? res.status(200).json(parkingSpots) : res.status(404).json(parkingSpots);
         } catch (error) {
-            res.status(500).json({ success: false, message: "Error al obtener los espacios de parqueo." });
+            return res.status(500).json({ success: false, message: "Error al obtener los espacios de parqueo." });
         }
     }  
+    static async createParkingSpot(req, res){
+        try {
+            const spotData = req.body;
+            const result = await ParkingSpot.createParkingSpot(spotData);
+            return result.success ? res.status(201).json(result) : res.status(400).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al crear el espacio de parqueo." });
+        }
+    }
 
 
 
