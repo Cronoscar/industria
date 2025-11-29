@@ -13,40 +13,49 @@ export default class PersonModel {
     surname;
     gender;
     email;
-    #password;
+    #salt;
+    password;
+    token;
     active;
 
     /**
      * @constructor
-     * @param {number} id - identificador
+     * @param {string} id - identificador
      * @param {string} name - nombre
      * @param {string} surname - apellido
      * @param {string} gender - genero
      * @param {string} email - correo electrónico
+     * @param {string} salt - salt para la contraseña
      * @param {string} password - contraseña
+     * @param {string} token - refresh token del usuario
      * @param {boolean} active - estado del usuario
      */
-    constructor(id, name, surname, gender, email, password, active){
-        this.id = id;
+    constructor(id, name, surname, gender, email, salt, password, token, active){
+        this.id = id || '';
         this.name = name;
         this.surname = surname;
         this.gender = gender || 'N/A';
         this.email = email;
-        this.#password = password;
+        this.#salt = salt;
+        this.password = password;
+        this.token = token || '';
         this.active = active || true;
     }
 
     static async create(personData){
         const result = await db.request()
-            .input('id',sql.Int,personData.id)
             .input('nombre',sql.NVarChar,personData.name)
             .input('apellido',sql.NVarChar,personData.surname)
             .input('genero',sql.NVarChar,personData.gender)
             .input('correo',sql.NVarChar,personData.email)
+            .input('salt',sql.NVarChar,personData.#salt)
             .input('contrasenia',sql.NVarChar,personData.password)
-            .input('activo', sql.Bit, personData.active) 
-            .query("INSERT INTO users.tblPersonas (ID, Nombre, Apellido, Correo, Genero, Contrasenia, Activo) VALUES (@id, @nombre, @apellido, @correo, @genero, @contrasenia, @activo);");
-        return { success: true, id: personData.id }
+            .input('token',sql.NVarChar,personData.token)
+            .query("INSERT INTO users.tblPersonas ( Nombre, Apellido, Genero, Correo, Salt, Contrasenia, Token) VALUES (@nombre, @apellido, @genero, @correo, @salt, @contrasenia, @token);");
+        const resultRecord = await db.request()
+            .input('correo',sql.NVarChar,personData.email)
+            .query('SELECT ID, Nombre, Apellido, Genero, Correo, Token FROM users.tblPersonas WHERE Correo=@correo;');
+        return resultRecord;
     }
 
     /**
@@ -65,9 +74,20 @@ export default class PersonModel {
      * @returns {PersonModel} Usuario con el id indicado
      */
     static async getById(id){
-        const person = await db.request().input('id',sql.Int, id)
-            .query("SELECT ID, Nombre, Apellido, Genero, Correo FROM users.tblPersonas WHERE ID=@id;");
-        return person.recordset;
+        const result = await db.request().input('id',sql.Int, id)
+            .query("SELECT ID, Nombre, Apellido, Genero, Correo, Salt, Contrasenia, Token, Activo FROM users.tblPersonas WHERE ID=@id;");
+        return result;
+    }
+
+    /**
+     * Obtiene una persona por email
+     * @param {String} email 
+     * @returns {PersonModel} Usuario con el email indicado
+     */
+    static async getByEmail(email){
+        const result = await db.request().input('email',sql.NVarChar, email)
+            .query("SELECT ID, Nombre, Apellido, Genero, Correo, Salt, Contrasenia, Token FROM users.tblPersonas WHERE Correo=@email;");
+        return result;
     }
 
     /**
@@ -110,11 +130,27 @@ export default class PersonModel {
         }
         return null;
     }
+
     static async disable(id){
         const result = await db.request()
             .input('id',sql.Int, id)
             .query("UPDATE users.tblPersonas SET Activo = 0 WHERE ID=@id;");
-        return result.rowsAffected.length > 0 ? { success: true } : { success: false, message: "No se pudo desactivar la persona." };
+        return result.rowsAffected.length > 0 ? { success: true, message: "Registro desactivado exitosamente" } : { success: false, message: "No se pudo desactivar la persona." };
+    }
+
+    // static async getRefreshToken(id){
+    //     const result = await db.request()
+    //         .input('id', sql.NVarChar, id)
+    //         .query("SELECT Token FROM users.tblPersonas WHERE ID=@id");
+    //     return result;
+    // }
+
+    static async updateRefreshToken(id, token){
+        const result = await db.request()
+            .input('token', sql.NVarChar, token)
+            .input('id', sql.Int, id)
+            .query("UPDATE users.tblPersonas SET Token=@token WHERE ID=@id")
+        return result;
     }
 }
 
