@@ -23,16 +23,21 @@ export default class BranchModel {
     }
 
     static async getAll(){
-        const result =  await db.request()
-        .query("SELECT a.ID_Sucursal,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio;");
-        return  result.recordset.length > 0 ? { success: true, data: result.recordset[0] } : { success: false, message: "Sucursales no encontradas." };
-
+        try {
+            const result =  await db.request()
+            .query("SELECT a.ID_Sucursal,a.Nombre,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio;");
+            console.log(result.recordset)
+            return  result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "Sucursales no encontradas." };
+        } catch (error) {
+            console.error("Error al obtener las sucursales:", error);
+            return { success: false, message: "Error al obtener las sucursales." };
+        }
     }
 
     static async getById(id){
         const result = await db.request()
         .input("ID_Sucursal",id)
-        .query("SELECT a.ID_Sucursal,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio and a.ID_Sucursal = @ID_Sucursal;");
+        .query("SELECT a.ID_Sucursal,a.Nombre,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio and a.ID_Sucursal = @ID_Sucursal;");
         return result.recordset[0];
     }
 
@@ -48,10 +53,10 @@ export default class BranchModel {
     }
     static async createBranch(branchData){
     try {
-        console.log("Datos recibidos en modelo:", branchData); // Para debug
+g
         
         const result = await db.request()
-            .input("Nombre", sql.NVarChar, branchData.name)
+            .input("Nombre", sql.NVarChar, branchData.nameBranch)
             .input("Ubicacion", sql.NVarChar, branchData.location)
             .input("Espacios_Disponibles", sql.Int, branchData.availableSpots)
             .input("Precio_Parqueo", sql.Decimal(10, 2), branchData.hourlyPrice)
@@ -75,6 +80,12 @@ export default class BranchModel {
         };
     }
 }
+    static async searchBranchesByName(name){
+        const result = await db.request()
+        .input("Nombre",sql.NVarChar,name)
+        .query("SELECT a.ID_Sucursal,a.Nombre,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio and a.Nombre LIKE '%' + @Nombre + '%';");
+        return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron sucursales con ese nombre." };
+    }
 }
 // CREATE TABLE trade.tblSucursales (
 //     ID_Sucursal INT IDENTITY(1,1) PRIMARY KEY,

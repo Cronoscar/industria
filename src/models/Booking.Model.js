@@ -27,12 +27,21 @@ export default class Booking {
         .query("SELECT * FROM parking.tblReservas WHERE ID_Reserva = @id");
         return result.recordset.length > 0 ? { success: true, data: result.recordset[0] } : { success: false, message: "Reserva no encontrada." };
     }
+    // Nuevo método para actualizar el estado de la reserva (activa, cancelada, finalizada)
     static async updateStatus(id, status){
         const result= await db.request()
         .input("id",id)
         .input("estado",status)
         .query("UPDATE parking.tblReservas SET Estado = @estado WHERE ID_Reserva = @id");
     return result.rowsAffected[0] > 0 ? { success: true, message: "Estado de la reserva actualizado correctamente." } : { success: false, message: "No se pudo actualizar el estado de la reserva." };
+    }
+    // Nuevo método para actualizar el código QR al momento de que el primer codifgo sea escaneado y se asigne uno nuevo para la salida
+    static async updateQrCode(id, codigo_qr){
+        const result= await db.request()
+        .input("id",id)
+        .input("codigo_qr",codigo_qr)
+        .query("UPDATE parking.tblReservas SET Codigo_QR = @codigo_qr WHERE ID_Reserva = @id");
+        return result.rowsAffected[0] > 0 ? { success: true, message: "Código QR de la reserva actualizado correctamente." } : { success: false, message: "No se pudo actualizar el código QR de la reserva." };
     }
 
 

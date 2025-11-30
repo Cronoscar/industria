@@ -36,4 +36,14 @@ export default class BookingController {
             return res.status(500).json({ success: false, message: "Error al actualizar el estado de la reserva." });
         }   
     }
+    static async updateQrCode(req, res){
+        try {
+            const { id } = req.params;
+            const { codigo_qr } = req.body;
+            const result = await Booking.updateQrCode(id, codigo_qr);
+            return result.success ? res.status(200).json(result) : res.status(400).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al actualizar el código QR de la reserva." });
+        }
+    }
 }
