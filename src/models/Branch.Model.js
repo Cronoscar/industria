@@ -1,6 +1,10 @@
 import { getConnection } from "../../utils/db.js";
 import sql from 'mssql';
 const db = await getConnection();
+/**
+ * Modelo de la entidad "sucursal" correspondiente a la tabla trade.tblSucursales
+ * @author: Gerardo Salinas <gerardoaplicano16@gmail.com>
+ */
 export default class BranchModel {
     #name;
     #location;
@@ -36,8 +40,18 @@ export default class BranchModel {
 
     static async getById(id){
         const result = await db.request()
-        .input("ID_Sucursal",id)
-        .query("SELECT a.ID_Sucursal,a.Nombre,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio and a.ID_Sucursal = @ID_Sucursal;");
+        .input("id_sucursal",sql.Int,id)
+        .query(`SELECT a.ID_Sucursal,a.Nombre, 
+                    (SELECT AVG(co.Calificacion) 
+                    FROM trade.tblComentarios AS co 
+                    WHERE co.ID_Sucursal = @id_sucursal) AS Calificacion,
+                    a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,
+                    a.Limite_Hora_Parqueo, a.Precio_parqueo,
+                    b.ID_Comercio,b.Nombre AS Nombre_Comercio 
+                FROM trade.tblSucursales AS a 
+                INNER JOIN trade.tblComercios AS b 
+                ON a.ID_Comercio = b.ID_Comercio 
+                WHERE a.ID_Sucursal = @id_sucursal;`);
         return result.recordset[0];
     }
 
@@ -65,8 +79,6 @@ export default class BranchModel {
             .input("ID_Comercio", sql.Int, branchData.commerceID)
             .query("INSERT INTO trade.tblSucursales (Nombre, Ubicacion, Espacios_Disponibles, Espacios_Totales, Precio_Parqueo, Limite_Hora_Parqueo, ID_Comercio) VALUES (@Nombre, @Ubicacion, @Espacios_Disponibles, @Espacios_Totales, @Precio_Parqueo, @Limite_Hora_Parqueo, @ID_Comercio);");
 
-
-        
         return result.rowsAffected[0] > 0 
             ? { success: true, data: branchData, message: "Sucursal creada exitosamente" } 
             : { success: false, message: "No se pudo crear la sucursal." };
@@ -86,6 +98,29 @@ export default class BranchModel {
         .query("SELECT a.ID_Sucursal,a.Nombre,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio and a.Nombre LIKE '%' + @Nombre + '%';");
         return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron sucursales con ese nombre." };
     }
+
+    static async getBranchesByCategory(categoryID){
+        const result = await db.request()
+            .input('id', sql.Int, categoryID)
+            .query(`SELECT s.ID_Sucursal, s.Nombre,
+                    s.Ubicacion, s.Espacios_Disponibles, 
+                    s.Precio_Parqueo, s.Espacios_Totales,
+                    s.Limite_Hora_Parqueo, s.ID_Comercio
+                FROM trade.tblSucursales AS s
+                INNER JOIN trade.tblSucursalCategorias AS sc
+                ON s.ID_Sucursal = sc.ID_Sucursal WHERE sc.ID_Categoria = @id;`);
+        return result;
+    }
+
+    // static async getBranchScore(branchID){
+    //     const result = await db.request()
+    //         .input('id_sucursal', sql.Int, branchID)
+    //         .query(`SELECT AVG(co.Calificacion) 
+    //             FROM trade.tblComentarios AS co
+    //             WHERE co.ID_Sucursal = id_sucursal;`);
+    //     return result;
+    // }
+
 }
 // CREATE TABLE trade.tblSucursales (
 //     ID_Sucursal INT IDENTITY(1,1) PRIMARY KEY,

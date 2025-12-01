@@ -36,5 +36,44 @@ export default class BranchController {
             return res.status(500).json({ success: false, message: "Error al obtener la sucursal." });
         }
     }
+
+    static async getBranchesByCategory(req, res){
+        try {
+            const { categoryID } = req.params
+            const result = await BranchModel.getBranchesByCategory(categoryID);
+            const customMessage = result.recordset.length === 0 ? `No se encontraron sucursales para la categoría con id ${categoryID}`
+                : `Sucursales de la categoría con id ${categoryID}`;
+            
+            return res.status(200).json({
+                success: true,
+                message: customMessage,
+                data: result.recordset
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Error al obtener las sucursales por categoría"
+            });
+        }
+    }
     
+    // static async getBranchScore(req, res){
+    //     try {
+    //         const { branchID } = req.params;
+    //         const result = await BranchModel.getBranchScore();
+
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: `Calificacion de la sucursal ${branchID}`,
+    //             data: result.recordset
+    //         });
+
+    //     } catch (error) {
+    //         console.error(error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: `Error al consultar la calificacion de la sucursal ${error}`
+    //         })
+    //     }
+    // }
 }
