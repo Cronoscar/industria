@@ -8,4 +8,5 @@ bookingRouter.get('/bookings/:id', BookingController.getBookingById);
 bookingRouter.put('/bookings/:id', BookingController.updateStatus);
 bookingRouter.put('/bookings/:id/qr', BookingController.updateQrCode);
 bookingRouter.get('/bookings/client/:clientId', BookingController.searchBookingsByClientId);
+bookingRouter.post('/bookings/verify/:idBooking', BookingController.verifyQrCode);
 export default bookingRouter;

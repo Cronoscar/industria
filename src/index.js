@@ -13,6 +13,7 @@ import bookingRouter from "./routes/Booking.Routes.js";
 import commentRouter from "./routes/Comment.Routes.js";
 import favoriteRouter from "./routes/Favorite.Routes.js";
 import recordRouter from "./routes/Record.Routes.js";
+import payRouter from "./routes/Pay.Routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './../swagger_output.json' with { type: 'json' };
 
@@ -47,6 +48,7 @@ app.use("/api", bookingRouter);
 app.use("/api", commentRouter);
 app.use("/api", favoriteRouter);
 app.use("/api", recordRouter);
+app.use("/api", payRouter);
 
 app.get("/api/version", (req, res) => {
   res.send("0.3.0");

@@ -55,4 +55,14 @@ export default class BookingController {
             return res.status(500).json({ success: false, message: "Error al buscar las reservas del cliente." });
         }
     }
+    static async verifyQrCode(req, res){
+        try {
+            const { idBooking } = req.params;
+            const { qrCode } = req.body;
+            const result = await Booking.verifyQrCode(idBooking, qrCode);
+            return result.success ? res.status(200).json(result) : res.status(404).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al verificar el código QR." });
+        }
+    }
 }

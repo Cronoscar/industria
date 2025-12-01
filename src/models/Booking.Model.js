@@ -54,6 +54,13 @@ export default class Booking {
         .query("SELECT * FROM parking.tblReservas WHERE ID_Cliente = @id_cliente");
     return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron Reservas para este cliente." };
     }
+    static async verifyQrCode(idBooking,qrCode){
+        const result= await db.request()
+        .input("codigo_qr", sql.NVarChar, qrCode)
+        .input("id_booking", sql.Int, idBooking)
+        .query("SELECT * FROM parking.tblReservas WHERE ID_Reserva = @id_booking and Codigo_QR = @codigo_qr");
+    return result.recordset.length > 0 ? { success: true, data: result.recordset[0] } : { success: false, message: "Código QR no válido." };
+    }
 
 
 
