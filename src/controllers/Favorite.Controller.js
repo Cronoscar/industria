@@ -35,4 +35,13 @@ export default class FavoriteController {
             return res.status(500).json({ success: false, message: "Error al obtener los favoritos del usuario." });
         }
     }
+    static async deleteFavoriteBranchbyUser(req, res){
+        try {
+            const { userID, branchID } = req.params;
+            const result = await FavoriteModel.deleteFavoriteBranchbyUser(userID, branchID);
+            return result.success ? res.status(200).json(result) : res.status(400).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al eliminar el favorito." });
+        }
+    }
 }

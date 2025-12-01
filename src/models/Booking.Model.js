@@ -1,4 +1,5 @@
 import { getConnection } from "../../utils/db.js";
+import qrCode from 'qrcode';
 import sql from 'mssql';
 const db = await getConnection();
 
@@ -6,13 +7,16 @@ export default class Booking {
 
     static async create(bookingData){
         console.log(bookingData);
+        const token = crypto.randomUUID();
+        // const qrCodeDataURL = await qrCode.toDataURL(token);
+        // console.log(qrCodeDataURL);
         const result= await db.request()
         .input("id_cliente", sql.Int, bookingData.id_cliente)
         .input("id_espacio", sql.Int, bookingData.id_espacio)
         .input("hora_inicio", sql.DateTime, bookingData.hora_inicio)
         .input("hora_final", sql.DateTime, bookingData.hora_final)
         .input("monto", sql.Decimal(10,2), bookingData.monto)
-        .input("codigo_qr", sql.NVarChar, bookingData.codigo_qr)
+        .input("codigo_qr", sql.NVarChar, token)
         .query("INSERT INTO parking.tblReservas (ID_Cliente, ID_Espacio, Hora_Inicio, Hora_Final, Monto, Codigo_QR) VALUES (@id_cliente, @id_espacio, @hora_inicio, @hora_final, @monto, @codigo_qr)");
     return result.rowsAffected[0] > 0 ? { success: true, message: "Reserva creada correctamente." } : { success: false, message: "No se pudo crear la reserva." };
     }
@@ -36,10 +40,11 @@ export default class Booking {
     return result.rowsAffected[0] > 0 ? { success: true, message: "Estado de la reserva actualizado correctamente." } : { success: false, message: "No se pudo actualizar el estado de la reserva." };
     }
     // Nuevo método para actualizar el código QR al momento de que el primer codigo sea escaneado y se asigne uno nuevo para la salida
-    static async updateQrCode(id, codigo_qr){
+    static async updateQrCode(idBooking){
+        const token = crypto.randomUUID();
         const result= await db.request()
-        .input("id",id)
-        .input("codigo_qr",codigo_qr)
+        .input("id",idBooking)
+        .input("codigo_qr",token)
         .query("UPDATE parking.tblReservas SET Codigo_QR = @codigo_qr WHERE ID_Reserva = @id");
         return result.rowsAffected[0] > 0 ? { success: true, message: "Código QR de la reserva actualizado correctamente." } : { success: false, message: "No se pudo actualizar el código QR de la reserva." };
     }

@@ -6,4 +6,5 @@ favoriteRouter.post('/favorites', FavoriteController.addFavorite);
 favoriteRouter.get('/favorites', FavoriteController.getAllFavorites);
 favoriteRouter.delete('/favorites/:id', FavoriteController.removeFavorite);
 favoriteRouter.get('/favorites/user/:userID', FavoriteController.getFavoritesByUserId);
+favoriteRouter.delete('/favorites/user/:userID/branch/:branchID', FavoriteController.deleteFavoriteBranchbyUser);
 export default favoriteRouter;
