@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import { getConnection , sql} from "../utils/db.js";
 import categoryRouter from "./routes/Category.Routes.js";
 import commerceRouter from "./routes/Commerce.Routes.js";
@@ -15,13 +16,21 @@ import recordRouter from "./routes/Record.Routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './../swagger_output.json' with { type: 'json' };
 
-
 dotenv.config();
+
 const app = express();
 const port = process.env.PORT || 8000;
+const FRONT_END_ORIGIN = process.env.FRONT_END_ORIGIN;
+
+const corsOptions = {
+  origin: FRONT_END_ORIGIN,
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors(corsOptions))
 
 // definimos la url para la documentación de la api
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -40,7 +49,7 @@ app.use("/api", favoriteRouter);
 app.use("/api", recordRouter);
 
 app.get("/api/version", (req, res) => {
-  res.send("0.1.0");
+  res.send("0.3.0");
 });
 
 app.listen(port, () => {
