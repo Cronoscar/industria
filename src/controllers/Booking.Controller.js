@@ -46,4 +46,13 @@ export default class BookingController {
             return res.status(500).json({ success: false, message: "Error al actualizar el código QR de la reserva." });
         }
     }
+    static async searchBookingsByClientId(req, res){
+        try {
+            const { clientId } = req.params;
+            const bookings = await Booking.searchBookingsByClientId(clientId);
+            return bookings.success ? res.status(200).json(bookings) : res.status(404).json(bookings);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al buscar las reservas del cliente." });
+        }
+    }
 }

@@ -7,4 +7,5 @@ bookingRouter.get('/bookings', BookingController.getAllBookings);
 bookingRouter.get('/bookings/:id', BookingController.getBookingById);
 bookingRouter.put('/bookings/:id', BookingController.updateStatus);
 bookingRouter.put('/bookings/:id/qr', BookingController.updateQrCode);
+bookingRouter.get('/bookings/client/:clientId', BookingController.searchBookingsByClientId);
 export default bookingRouter;

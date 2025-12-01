@@ -53,7 +53,7 @@ export default class BranchModel {
     }
     static async createBranch(branchData){
     try {
-g
+
         
         const result = await db.request()
             .input("Nombre", sql.NVarChar, branchData.nameBranch)

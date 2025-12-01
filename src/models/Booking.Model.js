@@ -43,6 +43,12 @@ export default class Booking {
         .query("UPDATE parking.tblReservas SET Codigo_QR = @codigo_qr WHERE ID_Reserva = @id");
         return result.rowsAffected[0] > 0 ? { success: true, message: "Código QR de la reserva actualizado correctamente." } : { success: false, message: "No se pudo actualizar el código QR de la reserva." };
     }
+    static async searchBookingsByClientId(clientId){
+        const result= await db.request()
+        .input("id_cliente", sql.Int, clientId)
+        .query("SELECT * FROM parking.tblReservas WHERE ID_Cliente = @id_cliente");
+    return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron Reservas para este cliente." };
+    }
 
 
 
