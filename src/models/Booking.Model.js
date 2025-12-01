@@ -35,7 +35,7 @@ export default class Booking {
         .query("UPDATE parking.tblReservas SET Estado = @estado WHERE ID_Reserva = @id");
     return result.rowsAffected[0] > 0 ? { success: true, message: "Estado de la reserva actualizado correctamente." } : { success: false, message: "No se pudo actualizar el estado de la reserva." };
     }
-    // Nuevo método para actualizar el código QR al momento de que el primer codifgo sea escaneado y se asigne uno nuevo para la salida
+    // Nuevo método para actualizar el código QR al momento de que el primer codigo sea escaneado y se asigne uno nuevo para la salida
     static async updateQrCode(id, codigo_qr){
         const result= await db.request()
         .input("id",id)
