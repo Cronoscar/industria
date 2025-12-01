@@ -4,5 +4,6 @@ const commentRouter = Router();
 
 commentRouter.post('/comments', CommentController.createComment);
 commentRouter.get('/comments', CommentController.getAllComments);
+commentRouter.get('/comments/:branchID', CommentController.getAllBranchComments);
 
 export default commentRouter;

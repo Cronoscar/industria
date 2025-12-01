@@ -20,15 +20,31 @@ export default class CommentModel {
             return { success: false, message: "Error al crear el comentario." };
         }
     }
+
     static async getAllComments(){
         try {
-        const result =  await db.request()
-        .query("SELECT * FROM trade.tblComentarios;");
-        return  result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "Comentarios no encontrados." };   
+            const result =  await db.request()
+            .query("SELECT * FROM trade.tblComentarios;");
+            return  result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "Comentarios no encontrados." };   
         } catch (error) {
             console.error("Error al obtener los comentarios:", error);
             return { success: false, message: "Error al obtener los comentarios." };
         }
+    }
+
+    static async getAllBranchComments(branchID){
+        const result = await db.request()
+            .input('id_sucursal', sql.Int, branchID)
+            .query(`SELECT co.ID_Comentario, co.ID_Cliente, 
+                        p.Nombre, p.Apellido, co.ID_Sucursal, 
+                        co.Texto, co.Calificacion, co.Fecha 
+                    FROM trade.tblComentarios AS co
+                    INNER JOIN users.tblClientes AS cl 
+                        ON co.ID_Cliente = cl.ID_Cliente
+                    INNER JOIN users.tblPersonas AS p 
+                        ON cl.ID_Cliente = p.ID
+                    WHERE co.ID_Sucursal = @id_sucursal;`);
+        return result;
     }
 
 
