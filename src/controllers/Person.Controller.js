@@ -23,19 +23,20 @@ export default class PersonController {
     // GET /api/person/:id - Obtener un usuario por ID
     static async getPersonById(req, res){
         try {
-            const user = await PersonModel.getById(req.params.id);
+            const result = await PersonModel.getById(req.params.id);
+            const user = result.recordset[0];
             if (!user) {
                 return res.status(404).json({
                     success: false,
                     message: "Usuario no encontrado",
                 });
             }
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 data: user,
             });
         } catch (error) {
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 message: "Error al obtener usuario",
                 error: error.message,
