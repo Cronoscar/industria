@@ -34,4 +34,21 @@ export default class CEOCommerceController {
             });
         }
     }
+    static async registerCEOandCommerce(req, res){
+        const registerCEOandCommercedata = req.body;
+        try {
+            const registerResult = await CEOCommerceModel.registerCEOandCommerce(registerCEOandCommercedata);
+            if (registerResult.success) {
+                res.status(201).json(registerResult);
+            } else {
+                res.status(400).json(registerResult);
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al registrar CEO y Comercio',
+                error: error.message
+            });
+        }
+    }
 }
