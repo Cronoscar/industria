@@ -14,6 +14,7 @@ import commentRouter from "./routes/Comment.Routes.js";
 import favoriteRouter from "./routes/Favorite.Routes.js";
 import recordRouter from "./routes/Record.Routes.js";
 import payRouter from "./routes/Pay.Routes.js";
+import CEOCommerceRouter from "./routes/CEOCommerce.Routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './../swagger_output.json' with { type: 'json' };
 
@@ -48,7 +49,7 @@ app.use("/api", commentRouter);
 app.use("/api", favoriteRouter);
 app.use("/api", recordRouter);
 app.use("/api", payRouter);
-
+app.use("/api", CEOCommerceRouter);
 app.get("/api/version", (req, res) => {
   res.send("0.3.0");
 });

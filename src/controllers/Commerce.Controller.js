@@ -37,4 +37,13 @@ export default class CommerceController {
             return res.status(500).json({ error: error.message });
         }
     }
+    static async searchCommerceByDNI(req, res){
+        const { dni } = req.params;
+        try{
+            const commerce = await CommerceModel.getCommerceByRepresentativeDNI(dni);
+            return commerce.success ?  res.status(200).json(commerce) : res.status(404).json(commerce);
+        }catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
 }

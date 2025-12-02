@@ -103,11 +103,20 @@ static async create(personData){
      * @returns {PersonModel} Usuario con el email indicado
      */
     static async getByEmail(email){
-        const result = await db.request().input('email',sql.NVarChar, email)
+        const result = await db.request()
+            .input('email', sql.NVarChar, email)
             .query("SELECT ID, Nombre, Apellido, Genero, Correo, Salt, Contrasenia, Token FROM users.tblPersonas WHERE Correo=@email;");
-        return result;
-    }
-
+        
+        // Asegúrate de que devuelve el formato correcto
+        if (result.recordset.length === 0) {
+            return { success: false, message: "Correo no encontrado." };
+        }
+        
+        return { 
+            success: true, 
+            data: result.recordset[0] 
+        };
+}
     /**
      * Actualiza el registro de una persona y devuelve el registro actualizado
      * @param {Int} id 

@@ -1,4 +1,5 @@
-import { getConnection, sql } from "../../utils/db.js";
+import { getConnection } from "../../utils/db.js";
+import sql from 'mssql';
 const db = await getConnection();
 
 export default class CategoryModel {

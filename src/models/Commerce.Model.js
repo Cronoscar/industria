@@ -1,5 +1,6 @@
 import { getConnection } from "../../utils/db.js";
 const db = await getConnection();
+import sql from 'mssql';    
 export default class CommerceModel {
     #name;
     constructor(name,rtn,dni,active ){
@@ -50,6 +51,30 @@ export default class CommerceModel {
         .query("INSERT INTO trade.tblComercios (Nombre, RTN, DNI_Representante) VALUES (@name, @rtn, @dni)");
     return result.rowsAffected[0] > 0 ? { success: true,data:commerceData } : { success: false, message: "No se pudo crear el Comercio." };
     }
+  static async getCommerceByRepresentativeDNI(dni){
+    const result = await db.request()
+        .input("dni", dni)
+        .query(`
+            SELECT 
+                C.ID_Comercio,
+                C.Nombre as NombreComercio,
+                C.RTN,
+                C.Activo,
+                RC.ID_Representante,
+                P.Nombre + ' ' + P.Apellido AS NombreRepresentante,
+                RC.Telefono,
+                P.Correo 
+            FROM trade.tblComercios AS C 
+            INNER JOIN users.tblRepresentantesCorporativos AS RC 
+                ON C.DNI_Representante = RC.ID_Representante
+            INNER JOIN users.tblPersonas AS P 
+                ON RC.ID_Representante = P.ID 
+            WHERE C.DNI_Representante = @dni;
+        `);
+    return result.recordset.length > 0 
+        ? { success: true, data: result.recordset[0] } 
+        : { success: false, message: "Comercio no encontrado." };
+}
 }
 
 //CREATE TABLE trade.tblComercios (
