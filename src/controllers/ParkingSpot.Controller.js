@@ -18,7 +18,13 @@ export default class ParkingSpotController {
             return res.status(500).json({ success: false, message: "Error al crear el espacio de parqueo." });
         }
     }
-
-
-
+    static async deleteParkingSpot(req, res){
+        try {
+            const { id } = req.params;
+            const result = await ParkingSpot.deleteParkingSpot(id);
+            return result.success ? res.status(200).json(result) : res.status(400).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al eliminar el espacio de parqueo." });
+        }
+    }
 }

@@ -62,6 +62,15 @@ export default class BranchController {
             });
         }
     }
+    static async getBranchesByCommerce(req, res){
+        try {
+            const { commerceID } = req.params;
+            const result = await BranchModel.getBranchesByCommerce(commerceID);
+            return result.success ? res.status(200).json(result) : res.status(404).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al obtener las sucursales por comercio." });
+        }
+    }
     
     // static async getBranchScore(req, res){
     //     try {

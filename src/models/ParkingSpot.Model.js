@@ -48,7 +48,13 @@ export default class ParkingSpot {
         .input("id_sucursal", sql.Int, spotData.id_sucursal)
         .query("INSERT INTO parking.tblEspacios_de_Parqueo (Codigo, Disponible, ID_Sucursal) VALUES (@codigo, @disponible, @id_sucursal)");
     return result.rowsAffected[0] > 0 ? { success: true, message: "Espacio de parqueo creado correctamente." } : { success: false, message: "No se pudo crear el espacio de parqueo." };
-    }   
+    } 
+    static async deleteParkingSpot(id){
+        const result= await db.request()
+        .input("id",id)
+        .query("DELETE FROM parking.tblEspacios_de_Parqueo WHERE ID_Espacio = @id");
+    return result.rowsAffected[0] > 0 ? { success: true, message: "Espacio de parqueo eliminado correctamente." } : { success: false, message: "No se pudo eliminar el espacio de parqueo." };
+    }  
 
 }
 

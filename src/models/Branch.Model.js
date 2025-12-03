@@ -71,10 +71,8 @@ export default class BranchModel {
         .query("Update trade.tblSucursales set Activo = 0 where ID_Sucursal = @ID_Sucursal;");
         return result.rowsAffected[0] > 0 ? { success: true, message: "Sucursal desactivada correctamente." } : { success: false, message: "No se pudo desactivar la Sucursal." };
     }
-    static async createBranch(branchData){
+ static async createBranch(branchData) {
     try {
-
-        
         const result = await db.request()
             .input("Nombre", sql.NVarChar, branchData.nameBranch)
             .input("Ubicacion", sql.NVarChar, branchData.location)
@@ -83,12 +81,23 @@ export default class BranchModel {
             .input("Espacios_Totales", sql.Int, branchData.totalSpots)
             .input("Limite_Hora_Parqueo", sql.Decimal(10, 2), branchData.parkingTimeLimit)
             .input("ID_Comercio", sql.Int, branchData.commerceID)
-            .query("INSERT INTO trade.tblSucursales (Nombre, Ubicacion, Espacios_Disponibles, Espacios_Totales, Precio_Parqueo, Limite_Hora_Parqueo, ID_Comercio) VALUES (@Nombre, @Ubicacion, @Espacios_Disponibles, @Espacios_Totales, @Precio_Parqueo, @Limite_Hora_Parqueo, @ID_Comercio);");
+            .query(`
+                INSERT INTO trade.tblSucursales 
+                (Nombre, Ubicacion, Espacios_Disponibles, Espacios_Totales, Precio_Parqueo, Limite_Hora_Parqueo, ID_Comercio)
+                VALUES (@Nombre, @Ubicacion, @Espacios_Disponibles, @Espacios_Totales, @Precio_Parqueo, @Limite_Hora_Parqueo, @ID_Comercio);
 
-        return result.rowsAffected[0] > 0 
-            ? { success: true, data: branchData, message: "Sucursal creada exitosamente" } 
-            : { success: false, message: "No se pudo crear la sucursal." };
-            
+                DECLARE @newId INT = SCOPE_IDENTITY();
+                SELECT @newId AS id_sucursal;
+            `);
+
+        const newId = result.recordset[0].id_sucursal;
+
+        return {
+            success: true,
+            data: { ...branchData, id_sucursal: newId },
+            message: "Sucursal creada exitosamente"
+        };
+
     } catch (error) {
         console.error("Error detallado en createBranch:", error);
         return { 
@@ -98,6 +107,7 @@ export default class BranchModel {
         };
     }
 }
+
     static async searchBranchesByName(name){
         const result = await db.request()
         .input("Nombre",sql.NVarChar,name)
@@ -117,6 +127,18 @@ export default class BranchModel {
                 ON s.ID_Sucursal = sc.ID_Sucursal WHERE sc.ID_Categoria = @id;`);
         return result;
     }
+    static async getBranchesByCommerce(commerceID){
+        const result = await db.request()
+            .input('id_comercio', sql.Int, commerceID)
+            .query(`SELECT s.ID_Sucursal, s.Nombre,
+                    s.Ubicacion, s.Espacios_Disponibles, 
+                    s.Precio_Parqueo, s.Espacios_Totales,
+                    s.Limite_Hora_Parqueo, s.ID_Comercio
+                FROM trade.tblSucursales AS s
+                WHERE s.ID_Comercio = @id_comercio;`);
+        return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron sucursales para este comercio." };
+    }
+
 
     // static async getBranchScore(branchID){
     //     const result = await db.request()
