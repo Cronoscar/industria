@@ -1,6 +1,8 @@
 import { getConnection } from "../../utils/db.js";
 import sql from 'mssql';
 import PersonModel from "./Person.Model.js";
+import { generateTokens } from "../middleware/auth.js";
+import bcrypt from "bcrypt";
 
 
 const db = await getConnection();
@@ -8,22 +10,34 @@ const db = await getConnection();
 export default class CustomerModel {
 
     static async createCustomer(customerData){
-        const person = await PersonModel.create(customerData.person);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(customerData.person.password, salt);
+        const newPerson = new PersonModel('', customerData.person.name, customerData.person.surname, customerData.person.gender, customerData.person.email, salt, hashedPassword,'',true);
+        
+        const { accessToken, refreshToken } = generateTokens(newPerson);
+        newPerson.token = refreshToken; 
+        const person = await PersonModel.create(newPerson);
         console.log(person);
         if (person.success == false){
 
             throw new Error("No se pudo crear la persona asociada al cliente");
         }else{
             console.log(person.data.id);
-            const result = await db.request()
-            .input('id_cliente', sql.Int, person.data.id)
-            .input('car', sql.NVarChar, customerData.customer.car)
-            .query("INSERT INTO users.tblClientes (ID_CLIENTE, Vehiculo) VALUES (@id_cliente, @car);");
+            if (!customerData.customer.car){
+                const result = await db.request()
+                .input('id_cliente', sql.Int, person.data.id)
+                .query("INSERT INTO users.tblClientes (ID_CLIENTE) VALUES (@id_cliente);");
+            }else {
+                const result = await db.request()
+                .input('id_cliente', sql.Int, person.data.id)
+                .input('car', sql.NVarChar, customerData.customer.car)
+                .query("INSERT INTO users.tblClientes (ID_CLIENTE, Vehiculo) VALUES (@id_cliente, @car);");
+            }
 
-            return { success: true, data: { id: person.data.id ,name: customerData.person.name, car: customerData.customer.car } };
+
+            return { success: true, data: { id: person.data.id ,name: customerData.person.name, car: customerData.customer?.car } };
 
         }
-            
     }
     static async getAllCustomers(){
         const result = await db.request()

@@ -1,7 +1,9 @@
 import { getConnection } from "../../utils/db.js";
 
+
 import sql from 'mssql';
 import bcrypt from "bcrypt";
+import { generateTokens } from "../middleware/auth.js";
 const db = await getConnection();
 /**
  * Modelo de la entidad "persona" de la tabla users.tblPersona
@@ -13,7 +15,7 @@ export default class PersonModel {
     surname;
     gender;
     email;
-    #salt;
+    salt;
     password;
     token;
     active;
@@ -36,24 +38,22 @@ export default class PersonModel {
         this.surname = surname;
         this.gender = gender || 'N/A';
         this.email = email;
-        this.#salt = salt;
+        this.salt = salt;
         this.password = password;
         this.token = token || '';
         this.active = active || true;
     }
 
 static async create(personData){
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(personData.password, salt);
 
     const insertResult = await db.request()
         .input('nombre', sql.NVarChar, personData.name)
         .input('apellido', sql.NVarChar, personData.surname)
         .input('genero', sql.NVarChar, personData.gender)
         .input('correo', sql.NVarChar, personData.email)
-        .input('salt', sql.NVarChar, salt)
-        .input('contrasenia', sql.NVarChar, hashed)
-        .input('token', sql.NVarChar, "")
+        .input('salt', sql.NVarChar, personData.salt)
+        .input('contrasenia', sql.NVarChar, personData.password)
+        .input('token', sql.NVarChar, personData.token)
         .query(`
             INSERT INTO users.tblPersonas 
             (Nombre, Apellido, Genero, Correo, Salt, Contrasenia, Token)

@@ -82,10 +82,10 @@ export default class PersonController {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         
-        const newPerson = new PersonModel('', name, surname, gender, email, salt, hashedPassword);
+        const newPerson = new PersonModel('', name, surname, gender, email, salt, hashedPassword,'',true);
         const { accessToken, refreshToken } = generateTokens(newPerson);
         newPerson.token = refreshToken; 
-
+        console.log(newPerson)
         const result = await PersonModel.create(newPerson);
         
         if (!result.success) {

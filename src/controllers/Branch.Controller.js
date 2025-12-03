@@ -1,4 +1,6 @@
 import BranchModel from "../models/Branch.Model.js";
+import CommentModel from "../models/Comment.Model.js"
+import Formatter from "../../utils/Formatter.js";
 
 export default class BranchController {
     static async getAllBranches(req, res){  
@@ -31,9 +33,13 @@ export default class BranchController {
         try {
             const { id } = req.params;
             const branch = await BranchModel.getById(id);
-            return branch ? res.status(200).json({ success: true, data: branch }) : res.status(404).json({ success: false, message: "Sucursal no encontrada." });
+            const result = await CommentModel.getAllBranchComments(id);
+            const branchComments = result.recordset;
+            const formattedComments = Formatter.formatComments(branchComments);
+            const formattedBranch = Formatter.formatBranch(branch, formattedComments);
+            return branch ? res.status(200).json({ success: true, data: formattedBranch }) : res.status(404).json({ success: false, message: "Sucursal no encontrada." });
         } catch (error) {
-            return res.status(500).json({ success: false, message: "Error al obtener la sucursal." });
+            return res.status(500).json({ success: false, message: `Error al obtener la sucursal. ${error}`});
         }
     }
 

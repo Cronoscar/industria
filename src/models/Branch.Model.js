@@ -26,10 +26,16 @@ export default class BranchModel {
         this.#commerceID = commerceID;
     }
 
+    //  arreglar la consulta para obtenga la calificacion del parqueo
     static async getAll(){
         try {
             const result =  await db.request()
-            .query("SELECT a.ID_Sucursal,a.Nombre,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio;");
+            .query(`SELECT a.ID_Sucursal,a.Nombre,
+                a.Ubicacion,a.Espacios_Disponibles,
+                a.Espacios_Totales,a.Limite_Hora_Parqueo,
+                a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio 
+                FROM trade.tblSucursales as a , trade.tblComercios as b 
+                WHERE a.ID_Comercio = b.ID_Comercio;`);
             console.log(result.recordset)
             return  result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "Sucursales no encontradas." };
         } catch (error) {
