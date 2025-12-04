@@ -65,4 +65,22 @@ export default class BookingController {
             return res.status(500).json({ success: false, message: "Error al verificar el código QR." });
         }
     }
+    static async getAllBookingsbyBranch(req, res){
+        try {
+            const {  commerceID, branchID } = req.params;
+            const bookings = await Booking.getAllBookingsbyBranch(commerceID, branchID);
+            return bookings.success ? res.status(200).json(bookings) : res.status(404).json(bookings);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al obtener las reservas de la sucursal." });
+        }   
+    }
+    static async getAllBookingsbyCommerce(req, res){
+        try {
+            const {  commerceID } = req.params;
+            const bookings = await Booking.getAllBookingbyCommerce(commerceID);
+            return bookings.success ? res.status(200).json(bookings) : res.status(404).json(bookings);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Error al obtener las reservas del comercio." });
+        }   
+    }
 }

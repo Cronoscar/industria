@@ -61,7 +61,25 @@ export default class Booking {
         .query("SELECT * FROM parking.tblReservas WHERE ID_Reserva = @id_booking and Codigo_QR = @codigo_qr");
     return result.recordset.length > 0 ? { success: true, data: result.recordset[0] } : { success: false, message: "Código QR no válido." };
     }
-
+    static async getAllBookingsbyBranch( commerceID, branchID){
+        const result= await db.request()
+        .input("id_sucursal", sql.Int, branchID)
+        .input("id_comercio", sql.Int, commerceID)
+        .query(`select r.ID_Reserva,r.Hora_Inicio,r.Hora_Final,r.Estado,r.Monto,r.Fecha_de_creacion,e.ID_Espacio,e.Codigo,e.Disponible,s.*,p.ID,p.Nombre +' '+ p.Apellido as Cliente ,c.Vehiculo from parking.tblReservas AS r,parking.tblEspacios_de_Parqueo AS e, trade.tblSucursales as s,users.tblPersonas as p,users.tblClientes as c  where r.ID_Espacio = e.ID_Espacio
+                and e.ID_Sucursal = 1 and s.ID_Comercio=1  and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente
+                and e.ID_Sucursal = 1 and s.ID_Comercio=1  and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente and e.ID_Sucursal=s.ID_Sucursal`);
+    return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron Reservas para esta sucursal." };
+    }
+    static async getAllBookingbyCommerce( commerceID){
+        
+        const result= await db.request()
+        .input("id_comercio", sql.Int, commerceID)
+        .query(`select r.ID_Reserva,r.Hora_Inicio,r.Hora_Final,r.Estado,r.Monto,r.Fecha_de_creacion,e.ID_Espacio,e.Codigo,e.Disponible,s.*,p.ID,p.Nombre +' '+ p.Apellido as Cliente ,c.Vehiculo 
+from parking.tblReservas AS r,parking.tblEspacios_de_Parqueo AS e, trade.tblSucursales as s,users.tblPersonas as p,users.tblClientes as c  where r.ID_Espacio = e.ID_Espacio
+and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente
+and e.ID_Sucursal = s.ID_Sucursal and s.ID_Comercio=@id_comercio  and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente and e.ID_Sucursal=s.ID_Sucursal`);
+    return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron Reservas para este comercio." };
+    }
 
 
 }
