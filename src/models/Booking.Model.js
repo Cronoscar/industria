@@ -1,7 +1,9 @@
 import { getConnection } from "../../utils/db.js";
+import RecordModel from "./Record.Model.js";
 import qrCode from 'qrcode';
 import sql from 'mssql';
 const db = await getConnection();
+
 
 export default class Booking {
 
@@ -54,20 +56,34 @@ export default class Booking {
         .query("SELECT * FROM parking.tblReservas WHERE ID_Cliente = @id_cliente");
     return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron Reservas para este cliente." };
     }
-    static async verifyQrCode(idBooking,qrCode){
+    static async verifyQrCode(qrCode){
         const result= await db.request()
         .input("codigo_qr", sql.NVarChar, qrCode)
-        .input("id_booking", sql.Int, idBooking)
-        .query("SELECT * FROM parking.tblReservas WHERE ID_Reserva = @id_booking and Codigo_QR = @codigo_qr");
-    return result.recordset.length > 0 ? { success: true, data: result.recordset[0] } : { success: false, message: "Código QR no válido." };
+        .query("SELECT * FROM parking.tblReservas WHERE Codigo_QR = @codigo_qr");
+        if(result.recordset.length > 0){
+            console.log(result.recordset[0]);
+            try {
+                await RecordModel.createRecord({
+                    clientID: result.recordset[0].data.ID_Cliente,
+                    bookingID: result.recordset[0].data.ID_Reserva,
+                    action: 'Qr de reserva verificado'
+                });
+                return { success: true, data: result.recordset[0], message: "Código QR verificado correctamente." };
+            } catch (error) {
+                console.error("Error al crear el registro:", error);
+                return { success: false, message: "Error al crear el registro de verificación." };
+            }
+        
+        } else {
+            return { success: false, message: "Código QR no válido." };
+        }
     }
-    static async getAllBookingsbyBranch( commerceID, branchID){
+    static async getAllBookingsbyBranch(  branchID){
         const result= await db.request()
         .input("id_sucursal", sql.Int, branchID)
-        .input("id_comercio", sql.Int, commerceID)
         .query(`select r.ID_Reserva,r.Hora_Inicio,r.Hora_Final,r.Estado,r.Monto,r.Fecha_de_creacion,e.ID_Espacio,e.Codigo,e.Disponible,s.*,p.ID,p.Nombre +' '+ p.Apellido as Cliente ,c.Vehiculo from parking.tblReservas AS r,parking.tblEspacios_de_Parqueo AS e, trade.tblSucursales as s,users.tblPersonas as p,users.tblClientes as c  where r.ID_Espacio = e.ID_Espacio
-                and e.ID_Sucursal = 1 and s.ID_Comercio=1  and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente
-                and e.ID_Sucursal = 1 and s.ID_Comercio=1  and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente and e.ID_Sucursal=s.ID_Sucursal`);
+                and e.ID_Sucursal = @id_sucursal and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente
+                and p.ID=c.ID_Cliente and c.ID_Cliente=r.ID_Cliente and e.ID_Sucursal=s.ID_Sucursal`);
     return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron Reservas para esta sucursal." };
     }
     static async getAllBookingbyCommerce( commerceID){
@@ -81,8 +97,10 @@ and e.ID_Sucursal = s.ID_Sucursal and s.ID_Comercio=@id_comercio  and p.ID=c.ID_
     return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron Reservas para este comercio." };
     }
 
+    
 
 }
+
 
 
 

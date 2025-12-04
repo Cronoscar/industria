@@ -60,7 +60,8 @@ app.listen(port, () => {
 // try {
 //     const db = await getConnection();
 //     console.log("Database connected");
-//     console.log(await db.request().query("SELECT a.ID_Sucursal,a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,a.Limite_Hora_Parqueo, a.Precio_parqueo,b.ID_Comercio,b.Nombre FROM trade.tblSucursales as a , trade.tblComercios as b where a.ID_Comercio = b.ID_Comercio;"));
+//     console.log(await db.request().query( `SELECT *
+//                 FROM trade.tblSucursales`));
 // } catch (error) {
 //     console.error("Database connection failed:", error);
 // }

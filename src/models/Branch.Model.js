@@ -33,7 +33,8 @@ export default class BranchModel {
             .query(`SELECT a.ID_Sucursal,a.Nombre,
                 a.Ubicacion,a.Espacios_Disponibles,
                 a.Espacios_Totales,a.Limite_Hora_Parqueo,
-                a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio 
+                a.Precio_parqueo,b.ID_Comercio,b.Nombre as Nombre_Comercio ,
+                a.Imagen
                 FROM trade.tblSucursales as a , trade.tblComercios as b 
                 WHERE a.ID_Comercio = b.ID_Comercio;`);
             console.log(result.recordset)
@@ -53,7 +54,8 @@ export default class BranchModel {
                     WHERE co.ID_Sucursal = @id_sucursal) AS Calificacion,
                     a.Ubicacion,a.Espacios_Disponibles,a.Espacios_Totales,
                     a.Limite_Hora_Parqueo, a.Precio_parqueo,
-                    b.ID_Comercio,b.Nombre AS Nombre_Comercio 
+                    b.ID_Comercio,b.Nombre AS Nombre_Comercio,
+                    a.Imagen
                 FROM trade.tblSucursales AS a 
                 INNER JOIN trade.tblComercios AS b 
                 ON a.ID_Comercio = b.ID_Comercio 
@@ -133,7 +135,8 @@ export default class BranchModel {
             .query(`SELECT s.ID_Sucursal, s.Nombre,
                     s.Ubicacion, s.Espacios_Disponibles, 
                     s.Precio_Parqueo, s.Espacios_Totales,
-                    s.Limite_Hora_Parqueo, s.ID_Comercio
+                    s.Limite_Hora_Parqueo, s.ID_Comercio,
+                    s.Imagen
                 FROM trade.tblSucursales AS s
                 WHERE s.ID_Comercio = @id_comercio;`);
         return result.recordset.length > 0 ? { success: true, data: result.recordset } : { success: false, message: "No se encontraron sucursales para este comercio." };
